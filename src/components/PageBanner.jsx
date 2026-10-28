@@ -43,7 +43,7 @@ export default function PageBanner({
           </span>
         )}
 
-      <h1 className="mt-6 w-[45%] max-w-4xl text-2xl font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:w-auto sm:text-4xl md:max-w-[50%] md:text-5xl lg:text-6xl">
+      <h1 className="mt-6 w-[45%] max-w-4xl -translate-y-8 text-2xl font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:w-auto sm:text-4xl md:max-w-[50%] md:text-5xl lg:text-6xl">
   {title}
 </h1>
 
