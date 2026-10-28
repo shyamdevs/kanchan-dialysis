@@ -209,7 +209,7 @@ export default function ImpactStats() {
             </div>
 
             <h3 className={numberClassName}>
-              <CountUp end={3} suffix="+" />
+              <CountUp end={5} suffix="+" />
             </h3>
 
             <p className={labelClassName}>Years of Uninterrupted Service</p>
