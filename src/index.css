@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/* Shared design tokens — Tailwind CSS v4 CSS-first theme configuration. */
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --color-primary-navy: #153C5B;
+  --color-primary-teal: #0798A5;
+  --color-primary-teal-dark: #087D8C;
+  --color-primary-navy-dark: #102A40;
+  --color-secondary-cyan: #28B8E5;
+  --color-background-blue: #F3F8FA;
+  --color-surface-teal: #E2F1F3;
+  --color-neutral-background: #F4F6F8;
+  --color-surface-white: #FFFFFF;
+  --color-text-secondary: #64748B;
+  --color-border-subtle: #E3EBEF;
+}
+
+:root {
+  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--color-primary-navy);
+  background: var(--color-surface-white);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+
+  --site-radius-card: 1.25rem;
+  --site-shadow-card: 0 12px 32px rgb(21 60 91 / 6%);
+  --site-shadow-header: 0 4px 18px rgb(21 60 91 / 4%);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+  background: var(--color-surface-white);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-surface-white);
+  color: var(--color-primary-navy);
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+option,
+optgroup,
+label,
+small,
+summary,
+table,
+th,
+td {
+  font-family: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+/* img,
+video {
+  height: auto;
+} */
+
+:where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  max-width: 100%;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]), select, textarea):focus-visible {
+  outline: 2px solid var(--color-primary-teal);
+  outline-offset: 2px;
+}
+
+:where(button, a, input, select, textarea, summary):focus-visible {
+  outline-color: var(--color-primary-teal);
+}
+
+::selection {
+  background: var(--color-surface-teal);
+  color: var(--color-primary-navy);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
