@@ -52,7 +52,7 @@ export default function News() {
   return (
     <>
       <PageBanner
-        label="News & Updates"
+       
         title="News, events and centre updates"
         subtitle="Photos, videos, announcements, awareness activities, and community moments published by the centre team."
         image={newsBackdrop}

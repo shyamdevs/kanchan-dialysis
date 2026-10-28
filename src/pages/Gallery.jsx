@@ -52,7 +52,7 @@ export default function Gallery() {
   return (
     <>
       <PageBanner
-        label="Gallery"
+    
         title="The centre, care and community"
         subtitle="Photos published by the centre team, focused on the facility, dialysis care, equipment, and community events."
         image={entrance}

@@ -66,7 +66,7 @@ export default function Contact() {
   return (
     <>
       <PageBanner
-        label="Contact us"
+       
         title="We’re here to help you take the next step"
         subtitle="For questions about services, visit preparation, volunteering, or contributions, please contact the centre directly."
         image={clinic}

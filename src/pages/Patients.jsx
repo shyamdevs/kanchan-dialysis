@@ -53,7 +53,7 @@ export default function Patients() {
   return (
     <>
       <PageBanner
-        label="Patient resources"
+      
         title="Information for your next visit"
         subtitle="Practical guidance for patients and families. Please confirm individual treatment and preparation instructions with the centre’s care team."
         image={clinic}

@@ -39,7 +39,7 @@ export default function About() {
   return (
     <>
       <PageBanner
-        label="ABOUT THE CENTRE"
+      
         title={
           <>
             <span className="block">Care With <br/>Compassion,</span>

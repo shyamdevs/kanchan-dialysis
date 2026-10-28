@@ -64,7 +64,7 @@ export default function GetInvolved() {
   return (
     <>
       <PageBanner
-        label="Get involved"
+      
         title="Be part of the mission of seva"
         subtitle="Explore ways to support the work of Shri Krishan Kanchan Sewa Trust through volunteering, awareness, and contributions."
         image={community}
