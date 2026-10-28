@@ -7,7 +7,7 @@ export default function PageBanner({
 }) {
   return (
     <section
-      className={`relative isolate overflow-hidden text-white ${image ? "bg-primary-navy" : "bg-gradient-to-r from-primary-navy via-primary-navy to-primary-teal"} ${compact ? "py-12 sm:py-16" : "py-16 sm:py-20 lg:py-24"}`}
+      className={`relative isolate overflow-hidden text-white ${image ? "bg-primary-navy" : "bg-gradient-to-r from-primary-navy via-primary-navy to-primary-teal"} ${compact ? "py-12 sm:py-16" : "py-16 sm:py-30 lg:py-55"}`}
     >
       {image && (
         <>
@@ -43,15 +43,15 @@ export default function PageBanner({
           </span>
         )}
 
-        <h1 className="mt-5 max-w-4xl text-3xl font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:text-4xl md:text-5xl md:max-w-[50%] lg:text-6xl">
-          {title}
-        </h1>
+      <h1 className="mt-6 w-[45%] max-w-4xl text-2xl font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:w-auto sm:text-4xl md:max-w-[50%] md:text-5xl lg:text-6xl">
+  {title}
+</h1>
 
-        {subtitle && (
+        {/* {subtitle && (
           <p className="mt-4 w-full max-w-full text-left text-sm leading-7 text-white/90 sm:text-base sm:leading-8 md:max-w-[40%]">
             {subtitle}
           </p>
-        )}
+        )} */}
       </div>
     </section>
   );

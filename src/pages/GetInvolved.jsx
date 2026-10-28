@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageBanner from "../components/PageBanner";
-import community from "../assets/kanchan-dialysis-get-involved-banner.png";
+import getinvolved from "../assets/kanchan-dialysis-get-involved-banner.png";
+import community from "../assets/KAN6.jpeg";
 
 const paths = [
   {
@@ -67,7 +68,7 @@ export default function GetInvolved() {
       
         title="Be part of the mission of seva"
         subtitle="Explore ways to support the work of Shri Krishan Kanchan Sewa Trust through volunteering, awareness, and contributions."
-        image={community}
+        image={getinvolved}
       />
       <section className="bg-white py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">

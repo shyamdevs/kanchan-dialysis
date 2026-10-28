@@ -52,13 +52,12 @@ export default function Patients() {
 
   return (
     <>
-      <PageBanner
-      
-        title="Information for your next visit"
-        subtitle="Practical guidance for patients and families. Please confirm individual treatment and preparation instructions with the centre’s care team."
-        image={clinic}
-      />
-
+<PageBanner
+  title="Information for your next visit"
+  subtitle="Practical guidance for patients and families. Please confirm individual treatment and preparation instructions with the centre’s care team."
+  image={clinic}
+  imageAlt="Patient care at Shri Kanchan Dialysis Centre"
+/>
       <PatientGuideSection />
 
       <PatientStoriesSection
