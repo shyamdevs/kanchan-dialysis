@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 import Admin from "../models/Admin.js";
 import { requireAdmin } from "../middleware/auth.js";
 
@@ -11,9 +11,11 @@ const loginLimiter = rateLimit({
   limit: 10,
   standardHeaders: "draft-8",
   legacyHeaders: false,
-  message: { message: "Too many login attempts. Please wait and try again." },
+  message: {
+    message: "Too many login attempts. Please wait and try again.",
+  },
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
 });
-
 function cookieOptions() {
   return {
     httpOnly: true,
@@ -23,6 +25,8 @@ function cookieOptions() {
     maxAge: 8 * 60 * 60 * 1000,
   };
 }
+
+
 
 router.post("/login", loginLimiter, async (req, res, next) => {
   try {

@@ -5,7 +5,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import { rateLimit } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 import { connectDatabase } from "./config/db.js";
 import Admin from "./models/Admin.js";
 import authRoutes from "./routes/auth.js";
@@ -47,6 +47,7 @@ app.use(
     limit: 180,
     standardHeaders: "draft-8",
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(req.ip),
   }),
 );
 app.get("/", (_req, res) => {
