@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import upiQrImage from '../assets/upi-qr-scanner-clean.png';
 
 const DONATION_CATEGORIES = [
@@ -214,6 +214,7 @@ const DonateSection = () => {
   const handlePresetSelect = (val) => {
     setAmount(val);
     setCustomInput(val.toString());
+    if (formErrors.amount) setFormErrors((prev) => ({ ...prev, amount: '' }));
   };
 
   const handleCustomAmountChange = (e) => {
@@ -221,6 +222,7 @@ const DonateSection = () => {
     setCustomInput(raw);
     const num = parseInt(raw, 10);
     setAmount(isNaN(num) ? 0 : num);
+    if (formErrors.amount) setFormErrors((prev) => ({ ...prev, amount: '' }));
   };
 
   const handleInputChange = (e) => {
@@ -312,8 +314,9 @@ const DonateSection = () => {
     e.preventDefault();
     const errors = {};
 
+    if (!(amount >= 1)) errors.amount = 'Please choose or enter a donation amount of at least ₹1.';
     if (!formData.fullName.trim()) errors.fullName = 'Full Name is required';
-    if (!formData.email.trim()) errors.email = 'Valid Email is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) errors.email = 'Valid Email is required';
     const nationalPhoneDigits = formData.mobile.replace(/\D/g, '');
     const callingCodeDigits = formData.countryCode.replace(/\D/g, '');
     const fullPhoneLength = nationalPhoneDigits.length + callingCodeDigits.length;
@@ -329,6 +332,8 @@ const DonateSection = () => {
     }
     if (formData.request80G && !formData.panNumber.trim()) {
       errors.panNumber = 'PAN Card is required for 80G Tax Exemption';
+    } else if (formData.panNumber.trim() && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.panNumber.trim().toUpperCase())) {
+      errors.panNumber = 'Enter a valid 10-character PAN (for example ABCDE1234F).';
     }
     if (!agreeTerms) {
       errors.terms = 'Please accept Terms & Conditions';
@@ -354,7 +359,7 @@ const DonateSection = () => {
       {/* Top Header */}
       <div className="mx-auto mb-8 max-w-7xl sm:mb-10">
         <div className="mb-7 flex items-center gap-2 text-sm font-medium text-[#64748B]">
-          <a href="#/" className="rounded-sm text-[#0798A5] transition hover:text-[#087F89] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0798A5]">← Home</a>
+          <a href="/" className="rounded-sm text-[#0798A5] transition hover:text-[#087F89] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0798A5]">← Home</a>
           <span className="text-[#94A3B8]">/</span>
           <span className="font-semibold text-[#153C5B]">Donate</span>
         </div>
@@ -451,8 +456,11 @@ const DonateSection = () => {
                   placeholder="Enter amount"
                   value={customInput ? formatINR(customInput) : ''}
                   onChange={handleCustomAmountChange}
+                  inputMode="numeric"
+                  aria-invalid={formErrors.amount ? 'true' : undefined}
                 />
               </div>
+              {formErrors.amount && <span data-donation-error role="alert" className="mt-1 block text-xs font-semibold text-red-600">{formErrors.amount}</span>}
             </div>
           </div>
 
@@ -799,7 +807,7 @@ const DonateSection = () => {
                   className="mt-1 h-4 w-4 shrink-0 accent-[#0798A5]"
                 />
                 <span>
-                  I agree to the <a href="#/contact">Terms &amp; Conditions</a> and <a href="#/contact">Privacy Policy</a>
+                  I agree to the <a href="/contact">Terms &amp; Conditions</a> and <a href="/contact">Privacy Policy</a>
                 </span>
               </label>
               {formErrors.terms && (

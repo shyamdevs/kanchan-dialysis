@@ -24,12 +24,21 @@ export function cleanPublicItem(item) {
   return value;
 }
 
+// Media must be HTTPS: the public site is served over HTTPS, so browsers block
+// plain-http images/videos as mixed content.
 export function validOptionalHttpsUrl(value) {
   if (!value) return true;
   try {
-    const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:';
+    return new URL(value).protocol === 'https:';
   } catch {
     return false;
   }
+}
+
+// Returns a valid Date, null for empty input, or undefined when the value
+// cannot be parsed (so callers can reject it instead of crashing in Mongoose).
+export function parseOptionalDate(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
 }

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { apiRequest } from '../lib/api';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { apiRequest, clearAuthToken, getAuthToken, setAuthToken } from '../lib/api';
 
 const TABS = [
   { id: 'gallery', label: 'Gallery' },
@@ -10,6 +10,8 @@ const TABS = [
 const GALLERY_CATEGORIES = ['Centre Facility', 'Dialysis Care', 'Equipment', 'Community Event', 'Health Camp', 'Awareness Programme', 'Centre Celebration'];
 const NEWS_CATEGORIES = ['Centre News', 'Health Camp', 'Awareness Programme', 'Community Event', 'Facility Update', 'Video Update'];
 const BLANK_FORM = { title: '', excerpt: '', body: '', description: '', category: '', imageUrl: '', imagePublicId: '', mediaUrl: '', mediaType: 'image', videoUrl: '', author: '', date: '', published: false, patientConsent: false };
+// Vercel rejects request bodies above ~4.5 MB, so keep uploads below that.
+const MAX_UPLOAD_MB = 4;
 const inputClass = 'mt-2 min-h-11 w-full rounded-xl border border-border-subtle bg-white px-3.5 py-2.5 text-sm text-primary-navy outline-none transition placeholder:text-text-secondary focus:border-primary-teal focus:ring-4 focus:ring-surface-teal';
 const fieldClass = 'block text-sm font-bold text-text-secondary';
 
@@ -33,23 +35,47 @@ export default function Admin() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
+  const latestListRequest = useRef(0);
+
+  // Returns true when the error was an expired/invalid session (the user is sent back to sign in).
+  const handleRequestError = useCallback((requestError) => {
+    if (requestError?.status === 401) {
+      clearAuthToken();
+      setAdmin(null); setItems([]); setForm(BLANK_FORM); setEditingId(null); setNotice('');
+      setError('Your session has expired. Please sign in again.');
+      return true;
+    }
+    setError(errorMessage(requestError));
+    return false;
+  }, []);
+
   const loadAdmin = useCallback(async () => {
+    if (!getAuthToken()) { setChecking(false); return; }
     try {
       const result = await apiRequest('/auth/me');
       setAdmin(result.admin);
-    } catch { setAdmin(null); }
+    } catch (sessionError) {
+      if (sessionError?.status === 401) clearAuthToken();
+      setAdmin(null);
+    }
     finally { setChecking(false); }
   }, []);
 
   const loadItems = useCallback(async () => {
     if (!admin) return;
+    // Ignore responses from earlier requests (e.g. after quickly switching tabs).
+    const requestId = ++latestListRequest.current;
     setBusy(true); setError('');
     try {
       const result = await apiRequest(`/admin/content/${tab}`);
+      if (requestId !== latestListRequest.current) return;
       setItems(Array.isArray(result.items) ? result.items : []);
-    } catch (loadError) { setError(errorMessage(loadError)); setItems([]); }
-    finally { setBusy(false); }
-  }, [admin, tab]);
+    } catch (loadError) {
+      if (requestId !== latestListRequest.current) return;
+      handleRequestError(loadError); setItems([]);
+    }
+    finally { if (requestId === latestListRequest.current) setBusy(false); }
+  }, [admin, tab, handleRequestError]);
 
   useEffect(() => { loadAdmin(); }, [loadAdmin]);
   useEffect(() => { if (admin) loadItems(); }, [admin, loadItems]);
@@ -58,6 +84,9 @@ export default function Admin() {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
     try {
       const result = await apiRequest('/auth/login', { method: 'POST', body: JSON.stringify(login) });
+      if (!result.token) throw new Error('Sign-in failed. Please try again.');
+      setAuthToken(result.token);
+      setLogin((current) => ({ ...current, password: '' }));
       setAdmin(result.admin); setNotice('Signed in successfully.');
     } catch (loginError) { setError(errorMessage(loginError)); }
     finally { setBusy(false); }
@@ -66,7 +95,7 @@ export default function Admin() {
   async function handleLogout() {
     try { await apiRequest('/auth/logout', { method: 'POST' }); }
     catch (logoutError) { setError(errorMessage(logoutError)); }
-    finally { setAdmin(null); setItems([]); setForm(BLANK_FORM); setEditingId(null); setNotice(''); }
+    finally { clearAuthToken(); setAdmin(null); setItems([]); setForm(BLANK_FORM); setEditingId(null); setNotice(''); }
   }
 
   function resetForm() { setForm(BLANK_FORM); setEditingId(null); setError(''); setNotice(''); }
@@ -86,13 +115,18 @@ export default function Admin() {
   async function uploadMedia(event) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file) return;
+    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+      setNotice('');
+      setError(`“${file.name}” is larger than ${MAX_UPLOAD_MB} MB. Please choose a smaller file, or paste an existing HTTPS media URL instead.`);
+      return;
+    }
     setUploading(true); setError(''); setNotice('');
     try {
       const body = new FormData(); body.append('file', file);
       const result = await apiRequest('/admin/upload', { method: 'POST', body });
       setForm((current) => ({ ...current, imageUrl: result.mediaType === 'image' ? result.url : current.imageUrl, mediaUrl: result.url, imagePublicId: result.publicId, mediaType: result.mediaType }));
       setNotice(`${result.mediaType === 'image' ? 'Image' : 'Video'} uploaded. Remember to save the content item.`);
-    } catch (uploadError) { setError(errorMessage(uploadError)); }
+    } catch (uploadError) { handleRequestError(uploadError); }
     finally { setUploading(false); }
   }
 
@@ -103,7 +137,7 @@ export default function Admin() {
       await apiRequest(path, { method: editingId ? 'PUT' : 'POST', body: JSON.stringify(form) });
       setNotice(form.published ? 'Content published successfully.' : 'Draft saved successfully.');
       setForm(BLANK_FORM); setEditingId(null); await loadItems();
-    } catch (saveError) { setError(errorMessage(saveError)); }
+    } catch (saveError) { handleRequestError(saveError); }
     finally { setBusy(false); }
   }
 
@@ -113,7 +147,7 @@ export default function Admin() {
     try {
       await apiRequest(`/admin/content/${tab}/${encodeURIComponent(item._id)}`, { method: 'DELETE' });
       setNotice('Content deleted.'); if (editingId === item._id) resetForm(); await loadItems();
-    } catch (deleteError) { setError(errorMessage(deleteError)); }
+    } catch (deleteError) { handleRequestError(deleteError); }
     finally { setBusy(false); }
   }
 
@@ -122,12 +156,11 @@ export default function Admin() {
   if (!admin) return <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-neutral-background via-neutral-background to-background-blue px-4 py-10"><div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-surface-teal/40 blur-3xl"/><div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-surface-teal/40 blur-3xl"/><section className="relative w-full max-w-md rounded-3xl border border-white/80 bg-white/95 p-6 shadow-2xl shadow-primary-navy/10 backdrop-blur sm:p-9"><a href="/" className="inline-flex items-center gap-2 text-sm font-bold text-primary-navy hover:text-primary-navy">← Back to website</a><div className="mt-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-teal-dark text-2xl font-bold text-white shadow-lg shadow-primary-navy/20">✚</div><p className="mt-6 text-xs font-extrabold uppercase tracking-[0.18em] text-primary-teal">Shri Kanchan Dialysis Centre</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight text-primary-navy">Admin sign in</h1><p className="mt-3 leading-7 text-text-secondary">Manage published gallery images, news and videos, patient posts, and trustee profiles.</p>{error && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3.5 text-sm font-medium text-red-800" role="alert">{error}</div>}{notice && <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm font-medium text-emerald-800" role="status">{notice}</div>}<form onSubmit={handleLogin} className="mt-6 space-y-5"><label className={fieldClass}>Email address<input type="email" name="email" autoComplete="username" required maxLength="254" value={login.email} onChange={(event) => setLogin((current) => ({ ...current, email: event.target.value }))} className={inputClass} placeholder="admin@example.com"/></label><label className={fieldClass}>Password<input type="password" name="password" autoComplete="current-password" required maxLength="300" value={login.password} onChange={(event) => setLogin((current) => ({ ...current, password: event.target.value }))} className={inputClass} placeholder="Your admin password"/></label><button type="submit" disabled={busy} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-teal-dark px-5 py-3.5 font-extrabold text-white shadow-lg shadow-primary-navy/15 transition hover:bg-primary-navy disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'Signing in…' : 'Sign in securely'} <span>→</span></button></form><p className="mt-5 text-xs leading-5 text-text-secondary">Administrator accounts are created from server environment settings. Public registration is disabled.</p></section></main>;
 
   const activeTab = TABS.find((entry) => entry.id === tab);
-  const categoryOptions = tab === 'gallery' ? GALLERY_CATEGORIES : tab === 'news' ? NEWS_CATEGORIES : [];
 
   return <main className="min-h-screen bg-neutral-background text-text-secondary">
     <header className="border-b border-border-subtle bg-white"><div className="mx-auto flex max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8"><div><a href="/" className="inline-flex items-center gap-2 text-sm font-bold text-primary-navy hover:text-primary-navy">← View website</a><p className="mt-4 text-xs font-extrabold uppercase tracking-[0.18em] text-primary-teal">Content management</p><h1 className="mt-1 text-2xl font-extrabold tracking-tight text-primary-navy sm:text-3xl">Kanchan Dialysis Admin</h1><p className="mt-2 text-sm text-text-secondary">Signed in as {admin.email}</p></div><button type="button" onClick={handleLogout} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border-subtle bg-white px-5 py-3 text-sm font-extrabold text-text-secondary transition hover:bg-neutral-background">Sign out</button></div></header>
     <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <nav aria-label="Content types" className="flex gap-2 overflow-x-auto rounded-2xl border border-border-subtle bg-white p-2 shadow-sm">{TABS.map((entry) => <button type="button" key={entry.id} onClick={() => { setTab(entry.id); resetForm(); }} className={`shrink-0 rounded-xl px-4 py-3 text-sm font-extrabold transition ${tab === entry.id ? 'bg-primary-teal-dark text-white shadow-md' : 'text-text-secondary hover:bg-neutral-background hover:text-primary-navy'}`}>{entry.label}</button>)}</nav>
+      <nav aria-label="Content types" className="flex gap-2 overflow-x-auto rounded-2xl border border-border-subtle bg-white p-2 shadow-sm">{TABS.map((entry) => <button type="button" key={entry.id} onClick={() => { setTab(entry.id); setItems([]); resetForm(); }} className={`shrink-0 rounded-xl px-4 py-3 text-sm font-extrabold transition ${tab === entry.id ? 'bg-primary-teal-dark text-white shadow-md' : 'text-text-secondary hover:bg-neutral-background hover:text-primary-navy'}`}>{entry.label}</button>)}</nav>
       {error && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800" role="alert">{error}</div>}{notice && <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800" role="status">{notice}</div>}
       <section className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(360px,0.85fr)_minmax(0,1.15fr)]">
         <div className="rounded-2xl border border-border-subtle bg-white shadow-sm"><div className="border-b border-border-subtle p-5 sm:p-6"><p className="text-xs font-extrabold uppercase tracking-[0.17em] text-primary-teal">{editingId ? 'Edit item' : 'Create item'}</p><h2 className="mt-2 text-xl font-extrabold text-primary-navy">{editingId ? 'Update content' : `Add ${activeTab.label.toLowerCase()}`}</h2><p className="mt-2 text-sm leading-6 text-text-secondary">Content is private until you tick “Publish” and save.</p></div>
@@ -142,7 +175,7 @@ export default function Admin() {
             {tab === 'trustees' && <label className={fieldClass}>Short profile<textarea name="excerpt" rows="3" maxLength="600" value={form.excerpt || ''} onChange={updateField} className={inputClass} placeholder="Verified biography or a short introduction"/></label>}
             <div className="grid gap-4 sm:grid-cols-2"><label className={fieldClass}>Display date<input type="date" name="date" value={form.date || ''} onChange={updateField} className={inputClass}/></label>{tab === 'news' && <label className={fieldClass}>Author / source<input name="author" maxLength="100" value={form.author || ''} onChange={updateField} className={inputClass} placeholder="Optional"/></label>}</div>
             <label className={fieldClass}>Image URL<input type="url" name="imageUrl" maxLength="2000" value={form.imageUrl || ''} onChange={updateField} className={inputClass} placeholder="https://… or upload a file below"/><span className="mt-1 block text-xs font-normal leading-5 text-text-secondary">Use clear images that the organisation is authorised to share.</span></label>
-            <label className={fieldClass}>Upload image{tab === 'news' ? ' or MP4 video' : ''}<input type="file" accept={tab === 'news' ? 'image/jpeg,image/png,image/webp,image/avif,video/mp4' : 'image/jpeg,image/png,image/webp,image/avif'} onChange={uploadMedia} disabled={uploading} className="mt-2 block w-full rounded-xl border border-border-subtle bg-white p-3 text-sm text-text-secondary file:mr-4 file:rounded-lg file:border-0 file:bg-neutral-background file:px-3 file:py-2 file:font-bold file:text-primary-navy hover:file:bg-background-blue"/><span className="mt-1 block text-xs font-normal leading-5 text-text-secondary">Uploads need Cloudinary credentials on the server. Alternatively, paste an existing HTTPS media URL above or below.</span>{uploading && <span role="status" className="mt-2 block text-sm font-bold text-primary-navy">Uploading media…</span>}</label>
+            <label className={fieldClass}>Upload image{tab === 'news' ? ' or MP4 video' : ''}<input type="file" accept={tab === 'news' ? 'image/jpeg,image/png,image/webp,image/avif,video/mp4' : 'image/jpeg,image/png,image/webp,image/avif'} onChange={uploadMedia} disabled={uploading} className="mt-2 block w-full rounded-xl border border-border-subtle bg-white p-3 text-sm text-text-secondary file:mr-4 file:rounded-lg file:border-0 file:bg-neutral-background file:px-3 file:py-2 file:font-bold file:text-primary-navy hover:file:bg-background-blue"/><span className="mt-1 block text-xs font-normal leading-5 text-text-secondary">Uploads need Cloudinary credentials on the server and must be under 4 MB. Alternatively, paste an existing HTTPS media URL above or below.</span>{uploading && <span role="status" className="mt-2 block text-sm font-bold text-primary-navy">Uploading media…</span>}</label>
             {tab === 'news' && <><label className={fieldClass}>Video URL (optional)<input type="url" name="mediaUrl" maxLength="2000" value={form.mediaUrl || ''} onChange={updateField} className={inputClass} placeholder="https://… video file URL"/></label><label className={fieldClass}>Related link / video URL<input type="url" name="videoUrl" maxLength="2000" value={form.videoUrl || ''} onChange={updateField} className={inputClass} placeholder="https://… optional"/></label><label className={fieldClass}>Media type<select name="mediaType" value={form.mediaType || 'image'} onChange={updateField} className={inputClass}><option value="image">Image</option><option value="video">MP4 video</option><option value="youtube">External video link</option><option value="none">Text only</option></select></label></>}
             {tab === 'patients' && <label className="flex items-start gap-3 rounded-xl border border-surface-teal bg-background-blue p-4 text-sm leading-6 text-primary-navy"><input type="checkbox" name="patientConsent" checked={Boolean(form.patientConsent)} onChange={updateField} className="mt-1 h-4 w-4 accent-primary-teal"/><span><strong className="block">Documented consent confirmed</strong>I confirm the centre has documented permission to publish this patient photo/story. This is required before publishing.</span></label>}
             <label className="flex items-start gap-3 rounded-xl border border-border-subtle bg-neutral-background p-4"><input type="checkbox" name="published" checked={Boolean(form.published)} onChange={updateField} className="mt-1 h-4 w-4 accent-primary-teal"/><span><strong className="block text-sm font-extrabold text-primary-navy">Publish this content</strong><small className="mt-1 block leading-5 text-text-secondary">{form.published ? 'Visible publicly after saving.' : 'Private draft; visitors cannot see it.'}</small></span></label>

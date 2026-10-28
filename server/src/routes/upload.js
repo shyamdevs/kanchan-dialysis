@@ -4,7 +4,13 @@ import { v2 as cloudinary } from 'cloudinary';
 import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
-const maxMb = Math.min(Math.max(Number(process.env.MAX_UPLOAD_MB || 8), 1), 25);
+// Vercel rejects request bodies over 4.5 MB before they reach Express (and that
+// rejection carries no CORS headers), so stay safely below it when deployed there.
+const platformLimitMb = process.env.VERCEL ? 4 : 25;
+const maxMb = Math.min(
+  Math.max(Number(process.env.MAX_UPLOAD_MB || 8) || 8, 1),
+  platformLimitMb,
+);
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: maxMb * 1024 * 1024, files: 1 },
@@ -34,7 +40,12 @@ function uploadBuffer(buffer, options) {
 
 router.post('/', requireAdmin, (req, res, next) => {
   upload.single('file')(req, res, async (uploadError) => {
-    if (uploadError) return res.status(400).json({ message: uploadError.message || 'Unable to upload this file.' });
+    if (uploadError) {
+      const message = uploadError.code === 'LIMIT_FILE_SIZE'
+        ? `This file is too large. Please upload a file under ${maxMb} MB, or paste an existing HTTPS media URL.`
+        : uploadError.message || 'Unable to upload this file.';
+      return res.status(400).json({ message });
+    }
     try {
       if (!req.file) return res.status(400).json({ message: 'Choose a file to upload.' });
       if (!detectAllowedSignature(req.file.buffer, req.file.mimetype)) return res.status(400).json({ message: 'The selected file content does not match its file type.' });

@@ -5,6 +5,7 @@ import { requireAdmin } from "../middleware/auth.js";
 import {
   cleanPublicItem,
   slugify,
+  parseOptionalDate,
   validOptionalHttpsUrl,
   validateType,
 } from "../utils/content.js";
@@ -24,7 +25,7 @@ const GALLERY_CATEGORIES = new Set([
 function fail(res, message, status = 400) {
   return res.status(status).json({ message });
 }
-function normalizePayload(body, type, createdBy) {
+function normalizePayload(body, type, { createdBy, existing } = {}) {
   const title = String(body?.title || "").trim();
   if (!title) throw new Error("Title is required.");
   if (title.length > 180)
@@ -34,7 +35,12 @@ function normalizePayload(body, type, createdBy) {
   const videoUrl = String(body?.videoUrl || "").trim();
   for (const url of [imageUrl, mediaUrl, videoUrl])
     if (!validOptionalHttpsUrl(url))
-      throw new Error("Media URLs must be valid HTTP or HTTPS links.");
+      throw new Error("Media URLs must be valid HTTPS links (starting with https://).");
+  const date = parseOptionalDate(body?.date);
+  if (date === undefined) throw new Error("Display date is not a valid date.");
+  const requestedPublishedAt = parseOptionalDate(body?.publishedAt);
+  if (requestedPublishedAt === undefined)
+    throw new Error("Publish date is not a valid date.");
   const published = body?.published === true || body?.published === "true";
   const patientConsent =
     body?.patientConsent === true || body?.patientConsent === "true";
@@ -79,16 +85,15 @@ function normalizePayload(body, type, createdBy) {
     author: String(body?.author || "")
       .trim()
       .slice(0, 100),
-    date: body?.date ? new Date(body.date) : null,
+    date,
     published,
-    publishedAt: published
-      ? body?.publishedAt
-        ? new Date(body.publishedAt)
-        : new Date()
-      : null,
+    publishedAt: published ? requestedPublishedAt || new Date() : null,
     patientConsent,
+    // Keep the original consent timestamp when an already-consented item is edited.
     consentRecordedAt:
-      type === "patients" && patientConsent ? new Date() : null,
+      type === "patients" && patientConsent
+        ? existing?.consentRecordedAt || new Date()
+        : null,
     ...(createdBy ? { createdBy } : {}),
   };
 }
@@ -118,7 +123,7 @@ router.get("/public/:type", async (req, res, next) => {
 
 router.get("/public/news/:slug", async (req, res, next) => {
   try {
-    const slug = decodeURIComponent(req.params.slug);
+    const { slug } = req.params;
     const item = await ContentItem.findOne({
       type: "news",
       slug,
@@ -152,11 +157,9 @@ router.post("/admin/content/:type", requireAdmin, async (req, res, next) => {
     if (!validateType(type)) return fail(res, "Unknown content type.", 404);
     let payload;
     try {
-      payload = normalizePayload(
-        req.body,
-        type,
-        new mongoose.Types.ObjectId(req.admin.id),
-      );
+      payload = normalizePayload(req.body, type, {
+        createdBy: new mongoose.Types.ObjectId(req.admin.id),
+      });
     } catch (error) {
       return fail(res, error.message);
     }
@@ -187,7 +190,7 @@ router.put("/admin/content/:type/:id", requireAdmin, async (req, res, next) => {
     }
     let payload;
     try {
-      payload = normalizePayload(input, type);
+      payload = normalizePayload(input, type, { existing });
     } catch (error) {
       return fail(res, error.message);
     }

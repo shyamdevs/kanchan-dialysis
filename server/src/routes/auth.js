@@ -6,9 +6,13 @@ import Admin from "../models/Admin.js";
 import { requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
+
+// Only failed attempts count, so a legitimate admin is never locked out by
+// their own successful sign-ins.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
+  skipSuccessfulRequests: true,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   message: {
@@ -16,17 +20,11 @@ const loginLimiter = rateLimit({
   },
   keyGenerator: (req) => ipKeyGenerator(req.ip),
 });
-function cookieOptions() {
-  return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/",
-    maxAge: 8 * 60 * 60 * 1000,
-  };
-}
 
-
+// Compared against when the email is unknown, so response time does not reveal
+// which email addresses are registered.
+const DUMMY_HASH =
+  "$2b$12$JELLenjSUlWbkcxJbj4dvuhxWuD/sxsHdsx1qud2iPruf1PlHKc3q";
 
 router.post("/login", loginLimiter, async (req, res, next) => {
   try {
@@ -41,10 +39,11 @@ router.post("/login", loginLimiter, async (req, res, next) => {
     }
 
     const admin = await Admin.findOne({ email }).select("+passwordHash");
-    const valid = admin
-      ? await bcrypt.compare(password, admin.passwordHash)
-      : false;
-    if (!valid)
+    const valid = await bcrypt.compare(
+      password,
+      admin ? admin.passwordHash : DUMMY_HASH,
+    );
+    if (!admin || !valid)
       return res
         .status(401)
         .json({ message: "Email or password is incorrect." });
@@ -52,12 +51,11 @@ router.post("/login", loginLimiter, async (req, res, next) => {
     const token = jwt.sign({ email: admin.email }, process.env.JWT_SECRET, {
       subject: String(admin._id),
       issuer: "kanchan-dialysis-cms",
+      algorithm: "HS256",
       expiresIn: "8h",
     });
-    admin.lastLoginAt = new Date();
-    await admin.save();
-    res.cookie("kanchan_admin", token, cookieOptions());
-    return res.json({ admin: { email: admin.email } });
+    await Admin.updateOne({ _id: admin._id }, { lastLoginAt: new Date() });
+    return res.json({ admin: { email: admin.email }, token });
   } catch (error) {
     return next(error);
   }
@@ -74,14 +72,8 @@ router.get("/me", requireAdmin, async (req, res, next) => {
   }
 });
 
-router.post("/logout", (_req, res) => {
-  res.clearCookie("kanchan_admin", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/",
-  });
-  return res.json({ success: true });
-});
+// Sessions are stateless bearer tokens held by the browser; signing out simply
+// means the browser discards the token.
+router.post("/logout", (_req, res) => res.json({ success: true }));
 
 export default router;
