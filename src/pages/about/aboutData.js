@@ -1,4 +1,4 @@
-import treatmentImage from "../../assets/KAN1.jpeg";
+import treatmentImage from "../../assets/baba.jpeg";
 import teamPhoto from "../../assets/KAN3.jpeg";
 import entrance from "../../assets/KAN6.jpeg";
 import facilityImage from "../../assets/KAN9.jpeg";
@@ -6,48 +6,44 @@ import facilityImage from "../../assets/KAN9.jpeg";
 export { treatmentImage, teamPhoto, entrance, facilityImage };
 
 export const principles = [
-  {
-    mark: "♡",
-    title: "Our mission",
-    text: "Support access to dialysis care and help patients navigate their care journey with dignity and respect.",
-    description:
-      "Our mission is to make the dialysis care journey easier to understand and navigate for patients and their families. We aim to treat every person with dignity, share clear information about available services and next steps, and help people connect with the support they may need.",
-    commitments: [
-      {
-        title: "Dignity in every interaction",
-        text: "Treat every patient and family with empathy, patience, and respect.",
-      },
-      {
-        title: "Clear guidance",
-        text: "Explain available services and next steps in language patients can understand.",
-      },
-      {
-        title: "Support for families",
-        text: "Help patients and caregivers know where to turn when they have questions.",
-      },
-    ],
-  },
-  {
-    mark: "◎",
-    title: "Our vision",
-    text: "A community where financial hardship is less likely to stand between a person and the care they need.",
-    description:
-      "We envision a community where financial hardship is less likely to prevent someone from seeking the dialysis care they need. Through a welcoming care environment, clear guidance, and community support, we hope to make the care journey more accessible and less isolating.",
-    commitments: [
-      {
-        title: "Fewer barriers",
-        text: "Help people find clear information about care and available support.",
-      },
-      {
-        title: "A welcoming environment",
-        text: "Help patients feel heard, respected, and comfortable asking questions.",
-      },
-      {
-        title: "Community involvement",
-        text: "Encourage people to support a more caring and informed community.",
-      },
-    ],
-  },
+{
+  mark: "◎",
+  title: "Our vision",
+  text: "Taking ahead the vision of Shri Shri 1008 Krishan Kanchan ji Maharaj , to provide cashless and comfortable medical facilities for common man and work for betterment of humanity.",
+  description:
+    "Our vision is to carry forward the vision of Shri Shri 1008 Krishan Kanchan Ji Maharaj by making cashless and comfortable medical facilities accessible to the common man. We strive to contribute to the betterment of humanity through compassionate care and dedicated service.",
+  commitments: [
+    {
+      title: "Cashless medical facilities",
+      text: "Work towards providing accessible, cashless medical facilities for the common man.",
+    },
+    {
+      title: "Comfortable healthcare",
+      text: "Create a comfortable and supportive healthcare environment for every patient.",
+    },
+    {
+      title: "Betterment of humanity",
+      text: "Continue the spirit of service and compassion for the well-being of society.",
+    },
+  ],
+},
+{
+  mark: "♡",
+  title: "Our mission",
+  text: "To assess dialysis needs based on social and demographic factors and provide specialized medical services to rural and urban patients.",
+  description:
+    "Our mission is to understand the needs and requirements of dialysis patients across different social and demographic backgrounds. We aim to provide specialized dialysis services through qualified medical staff, ensuring that both rural and urban patients receive dedicated care.",
+  commitments: [
+    {
+      title: "Understanding patient needs",
+      text: "Analyse dialysis needs, requirements, and service priorities based on social and demographic factors.",
+    },
+    {
+      title: "Specialized medical services",
+      text: "Provide expert dialysis services through qualified medical staff for both rural and urban patients.",
+    },
+  ],
+},
   {
     mark: "✦",
     title: "Our values",

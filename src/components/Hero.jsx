@@ -42,9 +42,7 @@ export default function Hero() {
 
           {/* Description */}
           <p className="mt-6 max-w-[600px] text-sm leading-7 text-text-secondary sm:text-base sm:leading-8 lg:text-lg">
-            A mission of seva, dignity, and compassionate kidney care.
-            We help patients and families understand their next step
-            and connect with the centre’s team.
+           A Misson of Seva, dignity, and compassionate kidney care for those who need it but can't afford.
           </p>
 
           {/* CTA Buttons */}

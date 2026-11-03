@@ -1,14 +1,36 @@
+
 import { useState } from "react";
 import PageBanner from "../components/PageBanner";
 import clinic from "../assets/KAN6.jpeg";
+import contact from "../assets/contact.jpeg";
+
+// Centre location details
+const centreName = "Shri Kanchan Dialysis Centre";
+
+const centreAddress =
+  "28, Janpath, near Dana Pani Restaurant, Shyam Nagar, Sodala, Jaipur, Rajasthan 302019";
+
+// Google Maps URLs
+const mapQuery = `${centreName}, ${centreAddress}`;
+
+const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  mapQuery
+)}`;
+
+const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+  mapQuery
+)}`;
+
+const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
+  mapQuery
+)}&output=embed`;
 
 const cards = [
   {
     icon: "⌖",
     title: "Visit us",
-    detail:
-      "29, Janpath, near Dana Pani Restaurant, Shyam Nagar, Sodala, Jaipur, Rajasthan 302019",
-    link: "https://www.openstreetmap.org/search?query=Shri%20Kanchan%20Dialysis%20Centre%20Jaipur",
+    detail: centreAddress,
+    link: mapSearchUrl,
     linkText: "Open map",
   },
   {
@@ -43,15 +65,21 @@ export default function Contact() {
     subject: "",
     message: "",
   });
+
   const [ready, setReady] = useState(false);
+
   const update = (event) =>
     setForm((current) => ({
       ...current,
       [event.target.name]: event.target.value,
     }));
+
   function submit(event) {
     event.preventDefault();
-    const subject = form.subject.trim() || "Consultation request from website";
+
+    const subject =
+      form.subject.trim() || "Consultation request from website";
+
     const body = [
       `Name: ${form.name}`,
       `Email: ${form.email}`,
@@ -59,20 +87,25 @@ export default function Contact() {
       "",
       form.message,
     ].join("\n");
-    window.location.href = `mailto:kanchandialysis@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = `mailto:kanchandialysis@gmail.com?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
     setReady(true);
   }
 
   return (
     <>
       <PageBanner
-       
         title="We’re here to help you take the next step"
         subtitle="For questions about services, visit preparation, volunteering, or contributions, please contact the centre directly."
         image={clinic}
       />
+
+      {/* Contact information cards */}
       <section className="bg-neutral-background py-12 sm:py-16">
-        <div className="mx-auto grid max-w-7xl gap-5 px-5 sm:px-8 sm:grid-cols-2 lg:grid-cols-4 lg:px-10">
+        <div className="mx-auto grid max-w-7xl gap-5 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-10">
           {cards.map((card) => (
             <article
               key={card.title}
@@ -81,17 +114,22 @@ export default function Contact() {
               <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-background-blue text-2xl font-bold text-primary-navy">
                 {card.icon}
               </span>
+
               <h2 className="mt-5 text-lg font-extrabold text-primary-navy">
                 {card.title}
               </h2>
+
               <p className="mt-2 min-h-16 break-words text-sm leading-6 text-text-secondary">
                 {card.detail}
               </p>
+
               <a
                 href={card.link}
                 target={card.link.startsWith("http") ? "_blank" : undefined}
-                rel={card.link.startsWith("http") ? "noreferrer" : undefined}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-primary-navy hover:text-primary-navy"
+                rel={
+                  card.link.startsWith("http") ? "noopener noreferrer" : undefined
+                }
+                className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-primary-navy hover:text-primary-teal"
               >
                 {card.linkText} <span>→</span>
               </a>
@@ -99,31 +137,41 @@ export default function Contact() {
           ))}
         </div>
       </section>
+
+      {/* Contact form and location */}
       <section className="bg-white py-14 sm:py-20">
         <div className="mx-auto grid max-w-7xl items-start gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_0.9fr] lg:gap-12 lg:px-10">
+
+          {/* Contact form */}
           <div className="rounded-3xl border border-border-subtle bg-white p-6 shadow-lg shadow-primary-navy/5 sm:p-8">
             <span className="text-sm font-extrabold uppercase tracking-[0.2em] text-primary-teal">
               Send a message
             </span>
+
             <h2 className="mt-3 text-3xl font-extrabold text-primary-navy">
               Get in touch
             </h2>
+
             <p className="mt-3 leading-7 text-text-secondary">
               Complete the form to prepare an email to our team. Your email app
               should open so you can review and send it.
             </p>
+
             {ready ? (
               <div className="mt-7 rounded-2xl border border-border-subtle bg-neutral-background p-5">
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-teal-dark text-xl font-bold text-white">
                   ✓
                 </span>
+
                 <h3 className="mt-4 text-lg font-extrabold text-primary-navy">
                   Your email draft is ready
                 </h3>
+
                 <p className="mt-2 leading-7 text-text-secondary">
                   Please send the email from your mail app to complete the
                   enquiry.
                 </p>
+
                 <button
                   type="button"
                   onClick={() => setReady(false)}
@@ -146,6 +194,7 @@ export default function Contact() {
                       className={inputClass}
                     />
                   </Field>
+
                   <Field label="Phone (optional)">
                     <input
                       name="phone"
@@ -158,6 +207,7 @@ export default function Contact() {
                     />
                   </Field>
                 </div>
+
                 <Field label="Email address">
                   <input
                     name="email"
@@ -170,6 +220,7 @@ export default function Contact() {
                     className={inputClass}
                   />
                 </Field>
+
                 <Field label="Subject (optional)">
                   <input
                     name="subject"
@@ -179,6 +230,7 @@ export default function Contact() {
                     className={inputClass}
                   />
                 </Field>
+
                 <Field label="Message">
                   <textarea
                     name="message"
@@ -190,12 +242,14 @@ export default function Contact() {
                     className={inputClass}
                   />
                 </Field>
+
                 <button
                   type="submit"
                   className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary-teal-dark px-5 py-3.5 font-extrabold text-white transition hover:bg-primary-navy sm:w-auto"
                 >
                   Prepare email <span>→</span>
                 </button>
+
                 <p className="text-xs leading-5 text-text-secondary">
                   Do not include confidential medical details in an ordinary
                   email. For urgent medical concerns, seek appropriate medical
@@ -204,40 +258,58 @@ export default function Contact() {
               </form>
             )}
           </div>
+
+          {/* Centre location and Google Maps */}
           <div className="overflow-hidden rounded-3xl border border-border-subtle bg-neutral-background shadow-sm">
             <img
-              src={clinic}
+              src={contact}
               alt="Shri Kanchan Dialysis Centre entrance"
-              className="h-64 w-full object-cover sm:h-80"
+              className="h-64 w-full sm:h-80"
             />
+
             <div className="p-6 sm:p-8">
               <span className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary-teal">
                 Find the centre
               </span>
+
               <h3 className="mt-3 text-2xl font-extrabold text-primary-navy">
-                Shri Kanchan Dialysis Centre
+                {centreName}
               </h3>
+
               <p className="mt-3 leading-7 text-text-secondary">
-                29, Janpath, near Dana Pani Restaurant, Shyam Nagar, Sodala,
-                Jaipur, Rajasthan 302019.
+                {centreAddress}.
               </p>
+
+              {/* Google Maps directions */}
               <a
-                href="https://www.openstreetmap.org/search?query=Shri%20Kanchan%20Dialysis%20Centre%20Jaipur"
+                href={directionsUrl}
                 target="_blank"
-                rel="noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-white px-5 py-3 font-bold text-primary-navy hover:bg-neutral-background"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-white px-5 py-3 font-bold text-primary-navy transition hover:bg-neutral-background"
               >
                 View directions ↗
               </a>
+
+              {/* Google Maps embedded location */}
               <div className="mt-6 overflow-hidden rounded-2xl border border-border-subtle bg-white">
                 <iframe
-                  title="Map of Jaipur area"
+                  title="Shri Kanchan Dialysis Centre location on Google Maps"
                   className="h-64 w-full"
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=75.7873%2C26.8850%2C75.8473%2C26.9350&layer=mapnik"
+                  src={mapEmbedUrl}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
                 />
               </div>
+
+              <a
+                href={mapSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-primary-navy underline underline-offset-4 hover:text-primary-teal"
+              >
+                View centre on Google Maps ↗
+              </a>
             </div>
           </div>
         </div>
@@ -248,6 +320,7 @@ export default function Contact() {
 
 const inputClass =
   "mt-2 min-h-12 w-full rounded-xl border border-border-subtle bg-white px-4 py-3 text-primary-navy outline-none transition placeholder:text-text-secondary focus:border-primary-teal focus:ring-4 focus:ring-surface-teal";
+
 function Field({ label, children }) {
   return (
     <label className="block text-sm font-bold text-text-secondary">

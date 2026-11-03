@@ -1,3 +1,7 @@
+
+import image1 from "../assets/service.jpeg";
+import image3 from "../assets/service2.jpeg";
+
 const services = [
   {
     number: "01",
@@ -5,7 +9,7 @@ const services = [
     description:
       "Learn about dialysis care at our centre and contact our team to discuss treatment arrangements and your next steps.",
     image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5W3CkYKFNrreT30rEFqLMt88LxYp4F9s_ZoH_C9zecELsSwV_xD2x_37G&s=10",
+      image1,
     alt: "Dialysis machine in a medical setting",
     label: "Our Core Service",
   },
@@ -25,7 +29,7 @@ const services = [
     description:
       "Speak with our team about appointment arrangements, required documents, and the next steps.",
     image:
-      "https://images.prismic.io/cls-health/aaW2qDPJ2QKSVUBx_AdobeStock_867731678.webp?auto=format,compress&rect=0,499,7012,3681&w=2400&h=1260",
+      image3,
     alt: "Medical professional in a healthcare setting",
     label: "Getting Started",
   },

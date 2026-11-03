@@ -190,7 +190,7 @@ export default function Footer() {
               </span>
 
               <p className="pt-1">
-                29, Janpath, near Dana Pani Restaurant,
+                28, Janpath, near Dana Pani Restaurant,
                 <br />
                 Shyam Nagar, Sodala,
                 <br />

@@ -130,8 +130,7 @@ export default function ImpactStats() {
           </h2>
 
           <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-text-secondary sm:text-base sm:leading-8">
-            Measuring our success not in revenue, but in lives touched and
-            families supported through accessible renal care.
+            Touching lives and supporting families through accessible kidney care
           </p>
 
           <div className="mx-auto mt-6 h-1 w-16 rounded-full bg-primary-teal" />
