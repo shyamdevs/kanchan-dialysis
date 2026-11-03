@@ -33,8 +33,10 @@ export default function PhotoStorySection() {
             {/* Subtle edge contrast, keeping the photo clear */}
             <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[#153C5B]/[0.06]" />
 
+            {/* On phones the label sits below the photo so it never covers a face;
+                from tablet width up it overlays the corner of the photo. */}
             {moment.eyebrow && (
-              <span className="absolute left-4 top-4 rounded-full border border-white/80 bg-white/95 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#153C5B] shadow-sm sm:left-5 sm:top-5">
+              <span className="absolute left-5 top-5 hidden rounded-full border border-white/80 bg-white/95 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#153C5B] shadow-sm sm:inline-flex">
                 {moment.eyebrow}
               </span>
             )}
@@ -42,6 +44,11 @@ export default function PhotoStorySection() {
 
           {/* Clean content area below the photograph */}
           <div className="p-5 sm:p-6">
+            {moment.eyebrow && (
+              <span className="mb-3 inline-flex rounded-full border border-[#E3EBEF] bg-[#F3F8FA] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#153C5B] sm:hidden">
+                {moment.eyebrow}
+              </span>
+            )}
             <h3 className="text-xl font-bold leading-snug text-[#153C5B] transition-colors duration-300 group-hover:text-[#0798A5]">
               {moment.title}
             </h3>
