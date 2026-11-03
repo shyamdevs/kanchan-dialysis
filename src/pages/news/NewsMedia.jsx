@@ -4,6 +4,7 @@ import {
   isVideoNews,
   isYouTubeNews,
 } from './newsData';
+import { LoopingPreview } from '../../components/MediaThumb';
 
 export default function NewsMedia({ item, large = false, onSelect, onExternalVideo }) {
   const title = getNewsTitle(item);
@@ -25,6 +26,27 @@ export default function NewsMedia({ item, large = false, onSelect, onExternalVid
   }
 
   if (isVideoNews(item) && mediaUrl) {
+    // Card: silent looping preview; clicking opens the full update (with sound and controls).
+    if (!large) {
+      return (
+        <button
+          type="button"
+          onClick={() => onSelect?.(item)}
+          aria-haspopup="dialog"
+          aria-label={`Watch video update: ${title}`}
+          className="relative block aspect-[4/3] w-full overflow-hidden bg-primary-navy text-left focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-primary-teal"
+        >
+          <LoopingPreview src={mediaUrl} poster={item.imageUrl} alt={title} className="h-full w-full object-cover" />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-3 rounded-full bg-primary-navy-dark/75 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white backdrop-blur-sm"
+          >
+            ▶ Video
+          </span>
+        </button>
+      );
+    }
+
     return (
       <div className={large
         ? 'flex h-[35vh] min-h-[220px] items-center justify-center bg-primary-navy p-2 sm:h-[45vh] md:h-[70vh] md:p-4'

@@ -3,7 +3,7 @@ import { getVideoUrl } from '../lib/media';
 
 // Silent looping preview used on cards. It only plays while it is on screen
 // (saves data and battery) and stays paused for people who prefer reduced motion.
-function LoopingPreview({ src, poster, alt, className }) {
+export function LoopingPreview({ src, poster, alt, className }) {
   const ref = useRef(null);
 
   useEffect(() => {
