@@ -58,8 +58,8 @@ export default function PatientStoryModal({ story, onClose }) {
           ×
         </button>
 
-        <div className="grid max-h-[90vh] overflow-y-auto md:grid-cols-[0.9fr_1.1fr]">
-          <div className="relative min-h-[240px] overflow-hidden bg-background-blue sm:min-h-[340px] md:min-h-[560px]">
+        <div className="grid max-h-[90vh] overflow-y-auto md:h-[85vh] md:max-h-[720px] md:grid-cols-[0.9fr_1.1fr] md:overflow-hidden">
+          <div className="relative min-h-[240px] overflow-hidden bg-background-blue sm:min-h-[340px] md:min-h-0">
             <MediaViewer
               item={story}
               alt={story.title ? `${isVideoItem(story) ? 'Video' : 'Photo'} for ${story.title}` : 'Patient story'}
@@ -68,7 +68,7 @@ export default function PatientStoryModal({ story, onClose }) {
             />
           </div>
 
-          <div className="p-6 sm:p-8 md:p-10">
+          <div className="p-6 sm:p-8 md:min-h-0 md:overflow-y-auto md:p-10">
             <span className="inline-flex rounded-full border border-surface-teal bg-background-blue px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.18em] text-primary-teal sm:text-xs">
               Shared with permission
             </span>

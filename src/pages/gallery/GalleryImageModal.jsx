@@ -59,17 +59,17 @@ export default function GalleryImageModal({ item, onClose }) {
           ×
         </button>
 
-        <div className="grid max-h-[90vh] overflow-y-auto md:grid-cols-[1.05fr_0.95fr]">
-          <div className="flex min-h-[240px] items-center justify-center bg-neutral-background p-3 sm:min-h-[360px] sm:p-6 md:min-h-[500px]">
+        <div className="grid max-h-[90vh] overflow-y-auto md:h-[85vh] md:max-h-[720px] md:grid-cols-[1.05fr_0.95fr] md:overflow-hidden">
+          <div className="flex min-h-[240px] items-center justify-center bg-neutral-background p-3 sm:min-h-[360px] sm:p-6 md:h-full md:min-h-0">
             <MediaViewer
               item={item}
               alt={title}
-              imageClassName="max-h-[50vh] w-full rounded-xl object-contain object-center sm:max-h-[62vh] md:max-h-[76vh]"
-              videoClassName="max-h-[50vh] w-full rounded-xl bg-black object-contain sm:max-h-[62vh] md:max-h-[76vh]"
+              imageClassName="max-h-[50vh] w-full rounded-xl object-contain object-center sm:max-h-[62vh] md:max-h-full"
+              videoClassName="max-h-[50vh] w-full rounded-xl bg-black object-contain sm:max-h-[62vh] md:max-h-full"
             />
           </div>
 
-          <div className="p-6 sm:p-8 md:p-10">
+          <div className="p-6 sm:p-8 md:min-h-0 md:overflow-y-auto md:p-10">
             <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary-teal">
               {item.category || 'Centre gallery'}
             </p>
