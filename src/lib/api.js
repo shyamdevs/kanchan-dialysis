@@ -81,3 +81,57 @@ export async function getPublishedContent(type) {
   const result = await apiRequest(`/public/${encodeURIComponent(type)}`);
   return Array.isArray(result.items) ? result.items : [];
 }
+// ---- Direct video upload (browser -> Cloudinary) ----------------------------
+// Vercel limits request bodies to ~4.5 MB, far too small for video, so the
+// server only signs the upload and the browser sends the file to Cloudinary.
+function videoPosterUrl(url) {
+  return url
+    .replace('/video/upload/', '/video/upload/so_0,f_jpg,q_auto,w_1280/')
+    .replace(/\.[a-z0-9]+(\?.*)?$/i, '.jpg');
+}
+
+// MP4 plays everywhere. MOV/WebM are converted to H.264 MP4 on delivery.
+function videoPlayableUrl(url) {
+  if (/\.mp4(\?.*)?$/i.test(url)) return url;
+  return url
+    .replace('/video/upload/', '/video/upload/f_mp4,vc_h264,q_auto/')
+    .replace(/\.[a-z0-9]+(\?.*)?$/i, '.mp4');
+}
+
+export async function uploadVideoDirect(file, onProgress) {
+  const sign = await apiRequest('/admin/upload/sign', { method: 'POST', body: JSON.stringify({}) });
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append('api_key', sign.apiKey);
+  form.append('timestamp', String(sign.timestamp));
+  form.append('signature', sign.signature);
+  form.append('folder', sign.folder);
+  form.append('allowed_formats', sign.allowedFormats);
+
+  const data = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${sign.cloudName}/video/upload`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100));
+    };
+    xhr.onload = () => {
+      let body = {};
+      try { body = JSON.parse(xhr.responseText); } catch { /* non-JSON error page */ }
+      if (xhr.status >= 200 && xhr.status < 300 && body.secure_url) return resolve(body);
+      // 401 from Cloudinary is not an expired admin session, so report it as a plain failure.
+      const status = xhr.status === 401 ? 400 : xhr.status;
+      reject(createApiError(body?.error?.message || 'Video upload failed. Please try again.', status));
+    };
+    xhr.onerror = () => reject(createApiError('Could not reach the upload service. Check your internet connection and try again.', 0));
+    xhr.ontimeout = () => reject(createApiError('The video upload timed out. Try a smaller video or a faster connection.', 0));
+    xhr.timeout = 15 * 60 * 1000;
+    xhr.send(form);
+  });
+
+  return {
+    url: videoPlayableUrl(data.secure_url),
+    posterUrl: videoPosterUrl(data.secure_url),
+    publicId: data.public_id,
+  };
+}

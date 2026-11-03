@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { MediaViewer } from '../../components/MediaThumb';
+import { isVideoItem } from '../../lib/media';
 
 export default function PatientStoryModal({ story, onClose }) {
   const closeButtonRef = useRef(null);
@@ -58,10 +60,11 @@ export default function PatientStoryModal({ story, onClose }) {
 
         <div className="grid max-h-[90vh] overflow-y-auto md:grid-cols-[0.9fr_1.1fr]">
           <div className="relative min-h-[240px] overflow-hidden bg-background-blue sm:min-h-[340px] md:min-h-[560px]">
-            <img
-              src={story.imageUrl}
-              alt={story.title ? `Photo for ${story.title}` : 'Patient story'}
-              className="absolute inset-0 h-full w-full object-cover object-center"
+            <MediaViewer
+              item={story}
+              alt={story.title ? `${isVideoItem(story) ? 'Video' : 'Photo'} for ${story.title}` : 'Patient story'}
+              imageClassName="absolute inset-0 h-full w-full object-cover object-center"
+              videoClassName="absolute inset-0 h-full w-full bg-black object-contain"
             />
           </div>
 

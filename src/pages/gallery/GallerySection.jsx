@@ -4,6 +4,8 @@ import {
   getGalleryTitle,
   normalizeGalleryCategory,
 } from './galleryData';
+import { MediaThumb } from '../../components/MediaThumb';
+import { isVideoItem } from '../../lib/media';
 
 const normalizeKey = (category) => normalizeGalleryCategory(category).toLocaleLowerCase();
 
@@ -35,10 +37,10 @@ export default function GallerySection({ items, status, onSelectItem }) {
             Life at the centre
           </span>
           <h2 className="mt-3 text-3xl font-extrabold text-primary-navy sm:text-4xl">
-            Gallery photos
+            Gallery photos &amp; videos
           </h2>
           <p className="mt-3 leading-7 text-text-secondary">
-            Browse published photos by category. Select a photo to view its full description.
+            Browse published photos and videos by category. Select an item to view it with its full description.
           </p>
         </div>
 
@@ -47,7 +49,7 @@ export default function GallerySection({ items, status, onSelectItem }) {
             role="status"
             className="rounded-2xl border border-border-subtle bg-white p-6 text-text-secondary shadow-sm"
           >
-            Loading published photos…
+            Loading published photos and videos…
           </p>
         )}
 
@@ -86,7 +88,7 @@ export default function GallerySection({ items, status, onSelectItem }) {
             <div
               className="flex flex-wrap gap-2"
               role="group"
-              aria-label="Filter gallery photos by category"
+              aria-label="Filter gallery items by category"
             >
               <button
                 type="button"
@@ -128,24 +130,24 @@ export default function GallerySection({ items, status, onSelectItem }) {
                 {filteredItems.map((item) => {
                   const description = getGalleryDescription(item);
                   const title = getGalleryTitle(item);
+                  const isVideo = isVideoItem(item);
+                  const viewLabel = isVideo ? 'View video' : 'View photo';
 
                   return (
                     <article
-                      key={item._id || item.slug || item.imageUrl}
+                      key={item._id || item.slug || item.imageUrl || item.mediaUrl}
                       className="group overflow-hidden rounded-2xl border border-border-subtle bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                     >
                       <button
                         type="button"
                         onClick={() => onSelectItem(item)}
                         aria-haspopup="dialog"
-                        aria-label={`View gallery image: ${title}`}
+                        aria-label={`${isVideo ? 'Play gallery video' : 'View gallery image'}: ${title}`}
                         className="relative block aspect-[4/3] w-full overflow-hidden bg-background-blue text-left focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-primary-teal"
                       >
-                        <img
-                          src={item.imageUrl}
+                        <MediaThumb
+                          item={item}
                           alt={title}
-                          loading="lazy"
-                          decoding="async"
                           className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105 group-focus-visible:scale-105"
                         />
                         {/* Desktop/tablet hover overlay. On phones the title and action
@@ -165,7 +167,7 @@ export default function GallerySection({ items, status, onSelectItem }) {
                             </span>
                           )}
                           <span className="mt-3 text-sm font-bold text-white">
-                            View photo <span aria-hidden="true">→</span>
+                            {viewLabel} <span aria-hidden="true">→</span>
                           </span>
                         </span>
                       </button>
@@ -187,7 +189,7 @@ export default function GallerySection({ items, status, onSelectItem }) {
                           aria-haspopup="dialog"
                           className="inline-flex shrink-0 items-center gap-1 rounded-full bg-background-blue px-3 py-2 text-sm font-extrabold text-primary-navy transition hover:bg-surface-teal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-teal"
                         >
-                          View photo <span aria-hidden="true">→</span>
+                          {viewLabel} <span aria-hidden="true">→</span>
                         </button>
                       </div>
                     </article>
@@ -199,7 +201,7 @@ export default function GallerySection({ items, status, onSelectItem }) {
                 className="mt-8 rounded-xl border border-border-subtle bg-white p-6 text-text-secondary"
                 role="status"
               >
-                There are no published photos in this category yet.
+                There are no published photos or videos in this category yet.
               </p>
             )}
           </>

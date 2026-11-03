@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import PageBanner from '../components/PageBanner';
 import { getPublishedContent } from '../lib/api';
+import { hasDisplayableMedia } from '../lib/media';
 import clinic from '../assets/patient.png';
 import PatientGuideSection from './patients/PatientGuideSection';
 import PatientStoriesSection from './patients/PatientStoriesSection';
@@ -19,7 +20,7 @@ export default function Patients() {
       .then((items) => {
         if (!live) return;
         const publishedItems = Array.isArray(items) ? items : [];
-        setStories(publishedItems.filter((item) => item?.imageUrl && item?.title));
+        setStories(publishedItems.filter((item) => hasDisplayableMedia(item) && item?.title));
         setStatus('ready');
       })
       .catch(() => {

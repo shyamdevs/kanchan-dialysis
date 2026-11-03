@@ -1,5 +1,7 @@
 // Only approved gallery categories are displayed. Category filter buttons are
 // generated dynamically from the published backend records in these categories.
+import { hasDisplayableMedia } from '../../lib/media';
+
 const APPROVED_GALLERY_CATEGORIES = new Set([
   'centre facility',
   'dialysis care',
@@ -21,7 +23,7 @@ export function getApprovedGalleryItems(records) {
 
   return records.filter((item) => {
     const category = normalizeGalleryCategory(item?.category).toLocaleLowerCase();
-    return Boolean(item?.imageUrl) && APPROVED_GALLERY_CATEGORIES.has(category);
+    return hasDisplayableMedia(item) && APPROVED_GALLERY_CATEGORIES.has(category);
   });
 }
 

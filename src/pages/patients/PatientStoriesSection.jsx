@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { MediaThumb } from '../../components/MediaThumb';
+import { isVideoItem } from '../../lib/media';
 
 const getStoryType = (story) => {
   const rawType = [
@@ -139,12 +141,10 @@ export default function PatientStoriesSection({ stories, status, onSelectStory }
                       aria-label={`Read full story: ${story.title}`}
                       className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-teal"
                     >
-                      <div className="aspect-[4/3] overflow-hidden bg-background-blue">
-                        <img
-                          src={story.imageUrl}
-                          alt={story.title ? `Photo for ${story.title}` : 'Patient story shared with permission'}
-                          loading="lazy"
-                          decoding="async"
+                      <div className="relative aspect-[4/3] overflow-hidden bg-background-blue">
+                        <MediaThumb
+                          item={story}
+                          alt={story.title ? `${isVideoItem(story) ? 'Video' : 'Photo'} for ${story.title}` : 'Patient story shared with permission'}
                           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                         />
                       </div>
@@ -156,7 +156,7 @@ export default function PatientStoriesSection({ stories, status, onSelectStory }
                           {story.title}
                         </h3>
                         <span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-primary-teal">
-                          Read full story <span aria-hidden="true">→</span>
+                          {isVideoItem(story) ? 'Watch video story' : 'Read full story'} <span aria-hidden="true">→</span>
                         </span>
                       </div>
                     </button>

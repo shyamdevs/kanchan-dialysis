@@ -1,11 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { getGalleryDescription, getGalleryTitle } from './galleryData';
+import { MediaViewer } from '../../components/MediaThumb';
+import { isVideoItem } from '../../lib/media';
 
 export default function GalleryImageModal({ item, onClose }) {
   const closeButtonRef = useRef(null);
   const dialogRef = useRef(null);
   const title = getGalleryTitle(item);
   const description = getGalleryDescription(item);
+  const isVideo = isVideoItem(item);
 
   useEffect(() => {
     closeButtonRef.current?.focus();
@@ -58,10 +61,11 @@ export default function GalleryImageModal({ item, onClose }) {
 
         <div className="grid max-h-[90vh] overflow-y-auto md:grid-cols-[1.05fr_0.95fr]">
           <div className="flex min-h-[240px] items-center justify-center bg-neutral-background p-3 sm:min-h-[360px] sm:p-6 md:min-h-[500px]">
-            <img
-              src={item.imageUrl}
+            <MediaViewer
+              item={item}
               alt={title}
-              className="max-h-[50vh] w-full rounded-xl object-contain object-center sm:max-h-[62vh] md:max-h-[76vh]"
+              imageClassName="max-h-[50vh] w-full rounded-xl object-contain object-center sm:max-h-[62vh] md:max-h-[76vh]"
+              videoClassName="max-h-[50vh] w-full rounded-xl bg-black object-contain sm:max-h-[62vh] md:max-h-[76vh]"
             />
           </div>
 
@@ -76,7 +80,7 @@ export default function GalleryImageModal({ item, onClose }) {
               {title}
             </h2>
             <div className="mt-6 h-px w-full bg-border-subtle" />
-            <h3 className="mt-6 text-lg font-extrabold text-primary-navy">About this photo</h3>
+            <h3 className="mt-6 text-lg font-extrabold text-primary-navy">About this {isVideo ? 'video' : 'photo'}</h3>
             {description ? (
               <p className="mt-3 whitespace-pre-line text-sm leading-7 text-text-secondary sm:text-base">
                 {description}

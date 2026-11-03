@@ -38,6 +38,23 @@ function uploadBuffer(buffer, options) {
   });
 }
 
+// Videos are usually far larger than Vercel's ~4.5 MB request limit, so the
+// browser uploads them straight to Cloudinary. This endpoint only hands out a
+// short-lived signature (the API secret never leaves the server) that is valid
+// for our folder and for video formats only.
+router.post('/sign', requireAdmin, (_req, res) => {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloudName || !apiKey || !apiSecret) {
+    return res.status(503).json({ message: 'Media upload is not configured yet. Add Cloudinary credentials to server/.env, or paste an existing HTTPS video URL.' });
+  }
+  const timestamp = Math.round(Date.now() / 1000);
+  const params = { allowed_formats: 'mp4,mov,webm', folder: 'kanchan-dialysis', timestamp };
+  const signature = cloudinary.utils.api_sign_request(params, apiSecret);
+  return res.json({ cloudName, apiKey, timestamp, folder: params.folder, allowedFormats: params.allowed_formats, signature });
+});
+
 router.post('/', requireAdmin, (req, res, next) => {
   upload.single('file')(req, res, async (uploadError) => {
     if (uploadError) {
