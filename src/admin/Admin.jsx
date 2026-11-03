@@ -8,7 +8,7 @@ const TABS = [
   { id: 'trustees', label: 'Trustees' },
 ];
 const GALLERY_CATEGORIES = ['Centre Facility', 'Dialysis Care', 'Equipment', 'Community Event', 'Health Camp', 'Awareness Programme', 'Centre Celebration'];
-const NEWS_CATEGORIES = ['Centre News', 'Health Camp', 'Awareness Programme', 'Community Event', 'Facility Update', 'Video Update'];
+const NEWS_CATEGORIES = ['Centre News', 'Healthcare', 'Awareness Programme', 'Community Event', 'Facility Update', 'Video Update'];
 const BLANK_FORM = { title: '', excerpt: '', body: '', description: '', category: '', imageUrl: '', imagePublicId: '', mediaUrl: '', mediaType: 'image', videoUrl: '', author: '', date: '', published: false, patientConsent: false };
 // Vercel rejects request bodies above ~4.5 MB, so keep uploads below that.
 const MAX_UPLOAD_MB = 4;
