@@ -367,7 +367,7 @@ export default function PatientReviewsStatic() {
             rel="noreferrer"
             className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-primary-teal px-6 py-3 text-sm font-bold text-white shadow-md shadow-primary-teal/15 transition hover:-translate-y-0.5  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-teal focus-visible:ring-offset-2"
           >
-            View Google Listing
+            View Google Reviews
             <span className="ml-2" aria-hidden="true">↗</span>
           </a>
         </div>

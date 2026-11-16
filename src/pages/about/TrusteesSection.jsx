@@ -55,7 +55,14 @@ export default function TrusteesSection({ trustees, trusteeStatus, onSelectTrust
           )}
 
           {trusteeStatus === "ready" && trustees.length > 0 && (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+           <div className="
+  mx-auto grid w-full
+  max-w-[1200px]
+  grid-cols-1 gap-6
+  sm:grid-cols-2
+  lg:grid-cols-3
+  lg:gap-8
+">
               {trustees.map((person) => {
                 const role = getTrusteeRole(person);
                 return (
